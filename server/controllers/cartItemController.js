@@ -19,6 +19,7 @@ const getAllCartItems = async (req, res) => {
 const addCartItem = async (req, res) => {
   try {
     const { productId } = req.body;
+    console.log(req.body);
     const cart = await CartItem.find({});
     if (cart.length < 1) {
       await CartItem.create({
