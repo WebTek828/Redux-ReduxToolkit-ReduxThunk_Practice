@@ -4,10 +4,11 @@ const Products = require("../Modals/Products");
 const getAllCartItems = async (req, res) => {
   try {
     CartItem.find({})
-      .populate("cartItems")
+      .populate("cartItems.id")
       .exec((err, cartItems) => {
         if (err) {
-          res.status(400).json({ msg: "error occured", err });
+          console.log(err);
+          res.status(400).json(err);
         } else {
           res.status(200).json(cartItems);
         }
@@ -22,10 +23,15 @@ const addCartItem = async (req, res) => {
   try {
     const { productId } = req.body;
     const cart = await CartItem.find({});
+    let newlyAddedProduct;
     if (cart.length < 1) {
-      await CartItem.create({
-        cartItems: [productId],
+      const created = await CartItem.create({
+        cartItems: {
+          id: productId,
+          pickedAmount: 1,
+        },
       });
+      newlyAddedProduct = created.cartItems[0];
     } else {
       const cartItems = cart[0].cartItems;
       const existingCartItem = cartItems.filter(
@@ -36,12 +42,24 @@ const addCartItem = async (req, res) => {
           .status(400)
           .json({ err: "This product already exist in the cart." });
       } else {
-        cart[0].cartItems.push(productId);
+        newlyAddedProduct = {
+          id: productId,
+          pickedAmount: 1,
+        };
+        cart[0].cartItems.push(newlyAddedProduct);
         await cart[0].save();
       }
     }
-    const newlyAddedProduct = await Products.findById(productId);
-    res.status(200).json(newlyAddedProduct);
+    CartItem.find({})
+      .populate("cartItems.id")
+      .exec((err, cartItems) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log(cartItems);
+          res.status(200).json(cartItems);
+        }
+      });
   } catch (err) {
     console.log(err);
     res.status(400).json({ msg: "Something went wrong", err });
