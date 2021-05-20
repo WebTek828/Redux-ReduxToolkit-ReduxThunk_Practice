@@ -27,8 +27,18 @@ const addCartItem = async (req, res) => {
         cartItems: [productId],
       });
     } else {
-      cart[0].cartItems.push(productId);
-      await cart[0].save();
+      const cartItems = cart[0].cartItems;
+      const existingCartItem = cartItems.filter(
+        (cartItem) => cartItem._id.toString() === productId
+      );
+      if (existingCartItem.length > 0) {
+        res
+          .status(400)
+          .json({ err: "This product already exist in the cart." });
+      } else {
+        cart[0].cartItems.push(productId);
+        await cart[0].save();
+      }
     }
     const newlyAddedProduct = await Products.findById(productId);
     res.status(200).json(newlyAddedProduct);
