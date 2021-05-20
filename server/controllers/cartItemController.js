@@ -1,4 +1,6 @@
 const CartItem = require("../Modals/CartItem");
+const Products = require("../Modals/Products");
+
 const getAllCartItems = async (req, res) => {
   try {
     CartItem.find({})
@@ -19,17 +21,17 @@ const getAllCartItems = async (req, res) => {
 const addCartItem = async (req, res) => {
   try {
     const { productId } = req.body;
-    console.log(req.body);
     const cart = await CartItem.find({});
     if (cart.length < 1) {
       await CartItem.create({
-        cartItems: productId,
+        cartItems: [productId],
       });
     } else {
       cart[0].cartItems.push(productId);
       await cart[0].save();
     }
-    res.status(200).json({ msg: "Added to cart." });
+    const newlyAddedProduct = await Products.findById(productId);
+    res.status(200).json(newlyAddedProduct);
   } catch (err) {
     console.log(err);
     res.status(400).json({ msg: "Something went wrong", err });
