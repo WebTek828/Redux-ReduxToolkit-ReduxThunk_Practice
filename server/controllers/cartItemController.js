@@ -1,5 +1,4 @@
 const CartItem = require("../Modals/CartItem");
-const Products = require("../Modals/Products");
 
 const getAllCartItems = async (req, res) => {
   try {
@@ -34,13 +33,14 @@ const addCartItem = async (req, res) => {
       newlyAddedProduct = created.cartItems[0];
     } else {
       const cartItems = cart[0].cartItems;
-      const existingCartItem = cartItems.filter(
-        (cartItem) => cartItem._id.toString() === productId
-      );
+      const existingCartItem = cartItems.filter((cartItem) => {
+        return cartItem.id.toString() === productId;
+      });
       if (existingCartItem.length > 0) {
         res
           .status(400)
           .json({ err: "This product already exist in the cart." });
+        return;
       } else {
         newlyAddedProduct = {
           id: productId,
@@ -56,7 +56,6 @@ const addCartItem = async (req, res) => {
         if (err) {
           console.log(err);
         } else {
-          console.log(cartItems);
           res.status(200).json(cartItems);
         }
       });
