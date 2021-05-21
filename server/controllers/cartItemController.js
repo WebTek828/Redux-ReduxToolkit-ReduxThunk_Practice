@@ -1,3 +1,4 @@
+const { update } = require("../Modals/CartItem");
 const CartItem = require("../Modals/CartItem");
 
 const getAllCartItems = async (req, res) => {
@@ -65,5 +66,27 @@ const addCartItem = async (req, res) => {
   }
 };
 
+const updateCartItemAmount = async (req, res) => {
+  try {
+    const { cartItemId } = req.params;
+    const { type } = req.body;
+    const cartItems = await CartItem.find({});
+    cartItems[0].cartItems.map((cartItem) => {
+      if (cartItem._id.toString() === cartItemId) {
+        cartItem.pickedAmount =
+          type === "inc"
+            ? cartItem.pickedAmount + 1
+            : cartItem.pickedAmount - 1;
+      }
+    });
+    await cartItems[0].save();
+    res.status(200).json({ msg: "Updated" });
+  } catch (err) {
+    console.log(err);
+    res.status(200).json(err);
+  }
+};
+
 exports.getAllCartItems = getAllCartItems;
 exports.addCartItem = addCartItem;
+exports.updateCartItemAmount = updateCartItemAmount;
