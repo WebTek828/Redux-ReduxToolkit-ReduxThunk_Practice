@@ -71,14 +71,20 @@ const updateCartItemAmount = async (req, res) => {
     const { cartItemId } = req.params;
     const { type } = req.body;
     const cartItems = await CartItem.find({});
-    cartItems[0].cartItems.map((cartItem) => {
+    cartItems[0].cartItems.map((cartItem, i) => {
       if (cartItem._id.toString() === cartItemId) {
-        cartItem.pickedAmount =
-          type === "inc"
-            ? cartItem.pickedAmount + 1
-            : cartItem.pickedAmount - 1;
+        if (type === "inc") {
+          cartItem.pickedAmount += 1;
+        } else {
+          if (cartItem.pickedAmount > 1) {
+            cartItem.pickedAmount -= 1;
+          } else {
+            cartItems[0].cartItems.splice(i, 1);
+          }
+        }
       }
     });
+
     await cartItems[0].save();
     res.status(200).json({ msg: "Updated" });
   } catch (err) {
